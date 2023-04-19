@@ -7,29 +7,10 @@ import {
   TransactionsContainer,
   TransactionsTable,
 } from './styles';
-
-interface Transactions {
-  id: number;
-  description: string;
-  type: 'income' | 'outcome';
-  category: string;
-  price: number;
-  createdAT: string;
-}
+import { useTransactions } from '../../contexts/TransactionsContext';
 
 export function Transactions() {
-  const [transactions, setTransactions] = useState<Transactions[]>([]);
-
-  async function loadTransaction() {
-    const response = await fetch('http://localhost:3333/transactions');
-    const data = await response.json();
-
-    setTransactions(data);
-  }
-
-  useEffect(() => {
-    loadTransaction();
-  }, []);
+  const { transactions } = useTransactions();
 
   return (
     <div>
