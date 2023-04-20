@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from 'styled-components'
 
 export const SearchFormContainer = styled.form`
   display: flex;
@@ -43,4 +43,4 @@ export const SearchFormContainer = styled.form`
       transition: background-color 0.2s, color 0.2s, border-color 0.2s;
     }
   }
-`;
+`
