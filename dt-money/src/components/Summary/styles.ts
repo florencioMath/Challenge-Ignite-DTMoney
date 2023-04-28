@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from 'styled-components';
 
 export const SummaryContainer = styled.section`
   width: 100%;
@@ -45,10 +45,10 @@ export const SummaryContainer = styled.section`
       background-color: #323238;
     }
   }
-`
+`;
 
 interface SummaryCardProps {
-  variant?: 'green'
+  variant?: 'green';
 }
 
 export const SummaryCard = styled.div<SummaryCardProps>`
@@ -68,4 +68,4 @@ export const SummaryCard = styled.div<SummaryCardProps>`
     margin-top: 1rem;
     font-size: 2rem;
   }
-`
+`;
