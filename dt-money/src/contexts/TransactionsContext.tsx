@@ -2,14 +2,15 @@ import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { api } from '../lib/axios';
 import { createContext } from 'use-context-selector';
 import { dbTransactions } from '../lib/firebase';
-import { getDocs } from '@firebase/firestore';
+import { getDocs, addDoc } from '@firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Transaction {
-  id: number;
+  id: string;
   description: string;
-  type: 'income' | 'outcome';
-  category: string;
   price: number;
+  category: string;
+  type: 'income' | 'outcome';
   createdAt: string;
 }
 
@@ -48,15 +49,18 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     async (data: CreateTransactionInput) => {
       const { description, price, category, type } = data;
 
-      const response = await api.post('transactions', {
+      const transaction = {
+        id: uuidv4(),
         description,
         price,
         category,
         type,
-        createdAt: new Date(),
-      });
+        createdAt: new Date().toISOString(),
+      };
 
-      setTransactions((state) => [response.data, ...state]);
+      await addDoc(dbTransactions, transaction);
+
+      setTransactions((state) => [transaction, ...state]);
     },
     []
   );
