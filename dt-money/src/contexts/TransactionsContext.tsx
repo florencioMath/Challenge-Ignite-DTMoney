@@ -1,6 +1,8 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { api } from '../lib/axios';
 import { createContext } from 'use-context-selector';
+import { dbTransactions } from '../lib/firebase';
+import { getDocs } from '@firebase/firestore';
 
 interface Transaction {
   id: number;
@@ -34,15 +36,12 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const fetchTransactions = useCallback(async (query?: string) => {
-    const response = await api.get('transactions', {
-      params: {
-        _sort: 'createdAt',
-        _order: 'desc',
-        q: query,
-      },
-    });
+    const transactionsSnapshot = await getDocs(dbTransactions);
+    const transactionsList = transactionsSnapshot.docs.map(
+      (doc) => doc.data() as Transaction
+    );
 
-    setTransactions(response.data);
+    setTransactions(transactionsList);
   }, []);
 
   const createTransaction = useCallback(
