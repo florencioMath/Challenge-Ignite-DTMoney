@@ -1,13 +1,16 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { api } from '../lib/axios';
 import { createContext } from 'use-context-selector';
+import { dbTransactions } from '../lib/firebase';
+import { getDocs, addDoc } from '@firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 
 interface Transaction {
-  id: number;
+  id: string;
   description: string;
-  type: 'income' | 'outcome';
-  category: string;
   price: number;
+  category: string;
+  type: 'income' | 'outcome';
   createdAt: string;
 }
 
@@ -20,7 +23,8 @@ interface CreateTransactionInput {
 
 interface TransactionContextType {
   transactions: Transaction[];
-  fetchTransactions: (query?: string) => Promise<void>;
+  fetchTransactions: () => Promise<void>;
+  filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
 }
 
@@ -34,30 +38,44 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   const fetchTransactions = useCallback(async (query?: string) => {
-    const response = await api.get('transactions', {
-      params: {
-        _sort: 'createdAt',
-        _order: 'desc',
-        q: query,
-      },
-    });
+    const transactionsSnapshot = await getDocs(dbTransactions);
+    const transactionsList = transactionsSnapshot.docs.map(
+      (doc) => doc.data() as Transaction
+    );
 
-    setTransactions(response.data);
+    return setTransactions(transactionsList);
+  }, []);
+
+  const filterTransactions = useCallback(async (query: string) => {
+    const transactionsSnapshot = await getDocs(dbTransactions);
+
+    const transactionsListFiltered = transactionsSnapshot.docs
+      .map((doc) => doc.data() as Transaction)
+      .filter((transaction) =>
+        transaction.description
+          .toLowerCase()
+          .includes(query.toLocaleLowerCase())
+      );
+
+    setTransactions(transactionsListFiltered);
   }, []);
 
   const createTransaction = useCallback(
     async (data: CreateTransactionInput) => {
       const { description, price, category, type } = data;
 
-      const response = await api.post('transactions', {
+      const transaction = {
+        id: uuidv4(),
         description,
         price,
         category,
         type,
-        createdAt: new Date(),
-      });
+        createdAt: new Date().toISOString(),
+      };
 
-      setTransactions((state) => [response.data, ...state]);
+      await addDoc(dbTransactions, transaction);
+
+      setTransactions((state) => [transaction, ...state]);
     },
     []
   );
@@ -68,7 +86,12 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   return (
     <TransactionsContext.Provider
-      value={{ transactions, fetchTransactions, createTransaction }}
+      value={{
+        transactions,
+        fetchTransactions,
+        createTransaction,
+        filterTransactions,
+      }}
     >
       {children}
     </TransactionsContext.Provider>
