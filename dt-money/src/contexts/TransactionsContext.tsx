@@ -23,7 +23,8 @@ interface CreateTransactionInput {
 
 interface TransactionContextType {
   transactions: Transaction[];
-  fetchTransactions: (query?: string) => Promise<void>;
+  fetchTransactions: () => Promise<void>;
+  filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
 }
 
@@ -42,7 +43,21 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       (doc) => doc.data() as Transaction
     );
 
-    setTransactions(transactionsList);
+    return setTransactions(transactionsList);
+  }, []);
+
+  const filterTransactions = useCallback(async (query: string) => {
+    const transactionsSnapshot = await getDocs(dbTransactions);
+
+    const transactionsListFiltered = transactionsSnapshot.docs
+      .map((doc) => doc.data() as Transaction)
+      .filter((transaction) =>
+        transaction.description
+          .toLowerCase()
+          .includes(query.toLocaleLowerCase())
+      );
+
+    setTransactions(transactionsListFiltered);
   }, []);
 
   const createTransaction = useCallback(
@@ -71,7 +86,12 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   return (
     <TransactionsContext.Provider
-      value={{ transactions, fetchTransactions, createTransaction }}
+      value={{
+        transactions,
+        fetchTransactions,
+        createTransaction,
+        filterTransactions,
+      }}
     >
       {children}
     </TransactionsContext.Provider>
