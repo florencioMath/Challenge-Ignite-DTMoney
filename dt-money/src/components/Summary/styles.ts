@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 
+import 'swiper/swiper.min.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 export const SummaryContainer = styled.section`
