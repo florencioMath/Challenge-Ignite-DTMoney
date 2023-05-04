@@ -1,6 +1,5 @@
 import { Header } from '../../components/Header';
 import { Summary } from '../../components/Summary';
-import { SearchForm } from './components/SearchForm';
 import {
   PriceHighlight,
   TransactionAmount,
@@ -10,6 +9,8 @@ import {
 import { useContextSelector } from 'use-context-selector';
 import { dateFormatter, priceFormatter } from '../../utils/formatter';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
+import { CardTransactions } from './components/CardTransaction';
+import { SearchForm } from './components/SearchForm/SearchForm';
 
 export function Transactions() {
   const transactions = useContextSelector(TransactionsContext, (context) => {
@@ -29,8 +30,15 @@ export function Transactions() {
         </TransactionAmount>
 
         <SearchForm />
+        {transactions.map((transaction) => {
+          return (
+            <div key={transaction.id}>
+              <CardTransactions transaction={transaction} />
+            </div>
+          );
+        })}
 
-        <TransactionsTable>
+        {/* <TransactionsTable>
           <tbody>
             {transactions.map((transaction) => {
               return (
@@ -49,7 +57,7 @@ export function Transactions() {
               );
             })}
           </tbody>
-        </TransactionsTable>
+        </TransactionsTable> */}
       </TransactionsContainer>
     </div>
   );
