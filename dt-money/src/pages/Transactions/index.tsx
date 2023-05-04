@@ -3,6 +3,7 @@ import { Summary } from '../../components/Summary';
 import { SearchForm } from './components/SearchForm';
 import {
   PriceHighlight,
+  TransactionAmount,
   TransactionsContainer,
   TransactionsTable,
 } from './styles';
@@ -14,6 +15,7 @@ export function Transactions() {
   const transactions = useContextSelector(TransactionsContext, (context) => {
     return context.transactions;
   });
+  const totalTransactions = transactions.length;
 
   return (
     <div>
@@ -21,6 +23,11 @@ export function Transactions() {
       <Summary />
 
       <TransactionsContainer>
+        <TransactionAmount>
+          Transações
+          <span>{totalTransactions} itens</span>
+        </TransactionAmount>
+
         <SearchForm />
 
         <TransactionsTable>
