@@ -21,11 +21,24 @@ export const Content = styled(Dialog.Content)`
   left: 50%;
   transform: translate(-50%, -50%);
 
+  @media screen and (max-width: 390px) {
+    min-width: 100%;
+    padding: 1.5rem;
+
+    top: auto;
+    bottom: 0;
+    transform: translateX(-50%);
+  }
+
   form {
     margin: 2rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+
+    @media screen and (max-width: 390px) {
+      margin: 1.5rem 0;
+    }
 
     input {
       border-radius: 6px;

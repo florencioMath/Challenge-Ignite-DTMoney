@@ -1,4 +1,4 @@
-import { CalendarBlank, Tag, TagSimple } from 'phosphor-react';
+import { CalendarBlank, TagSimple } from 'phosphor-react';
 import {
   CategoryAndCreateAtContainer,
   CategoryContainer,
