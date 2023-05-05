@@ -7,46 +7,88 @@ export const TransactionContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   border-radius: 6px;
 
   gap: 8px;
 
+  color: ${(props) => props.theme['gray-300']};
   background: ${(props) => props.theme['gray-700']};
+
+  @media screen and (max-width: 910px) {
+    flex-direction: column;
+  }
 `;
 
 export const BaseItems = styled.div`
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 8px;
+  overflow: hidden;
+
+  @media screen and (max-width: 910px) {
+    min-width: 100%;
+    flex-direction: column;
+  }
 `;
 
-export const DescriptionAndPriceContainer = styled(BaseItems)``;
-
-export const DescriptionContainer = styled(BaseItems)`
+export const DescriptionAndPriceContainer = styled(BaseItems)`
   width: 70%;
-`;
 
-export const PriceContainer = styled(BaseItems)`
-  width: 30%;
+  @media screen and (max-width: 910px) {
+    min-width: 100%;
+    gap: 0.25rem;
+
+    margin-bottom: 0.75rem;
+  }
 `;
 
 export const CategoryAndCreateAtContainer = styled(BaseItems)`
-  width: 40%;
+  width: 30%;
+
+  @media screen and (max-width: 910px) {
+    min-width: 100%;
+    flex-direction: row;
+
+    color: ${(props) => props.theme['gray-500']};
+  }
 `;
 
-export const CategoryContainer = styled(BaseItems)`
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+export const DescriptionContainer = styled.div`
+  width: 80%;
+
+  @media screen and (max-width: 910px) {
+    min-width: 100%;
+  }
 `;
 
-export const CratedAtContainer = styled(BaseItems)`
+export const PriceContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+
+  width: 20%;
+
+  @media screen and (max-width: 910px) {
+    min-width: 100%;
+    font-size: 1.25rem;
+  }
+`;
+
+export const CategoryContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 4px;
+`;
+
+export const CratedAtContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 4px;
 `;
 
 interface PriceHighlightProps {
