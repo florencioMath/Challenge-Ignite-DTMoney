@@ -14,6 +14,11 @@ export const TransactionContainer = styled.div`
   color: ${(props) => props.theme['gray-300']};
   background: ${(props) => props.theme['gray-700']};
 
+  &:hover {
+    background: ${(props) => props.theme['gray-600']};
+    transition: background-color 0.2s;
+  }
+
   @media screen and (max-width: 910px) {
     flex-direction: column;
   }
