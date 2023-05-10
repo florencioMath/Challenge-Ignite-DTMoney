@@ -31,7 +31,7 @@ export const Content = styled(Dialog.Content)`
   }
 
   form {
-    margin: 2rem;
+    margin-top: 2rem;
     display: flex;
     flex-direction: column;
     gap: 1rem;
