@@ -7,7 +7,7 @@ import {
   TransactionType,
   TransactionTypeButton,
 } from './styles';
-import { ArrowCircleDown, ArrowCircleUp, X } from 'phosphor-react';
+import { ArrowCircleDown, ArrowCircleUp, FileDoc, X } from 'phosphor-react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -38,10 +38,15 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
   const {
     register,
     control,
+    handleSubmit,
     formState: { isSubmitting },
   } = useForm<EditTransactionsFormInput>({
     resolver: zodResolver(editTransactionFormScheme),
   });
+
+  function handleEditTransaction(data: EditTransactionsFormInput) {
+    // console.log(data);
+  }
 
   return (
     <Dialog.Portal>
@@ -54,49 +59,48 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
           <X size={24} />
         </CloseButton>
 
-        <form>
+        <form onSubmit={handleSubmit(handleEditTransaction)}>
           <input
             type="text"
             placeholder="Descrição"
             required
-            value={transaction.description}
+            defaultValue={transaction.description}
             {...register('description')}
           />
           <input
             type="number"
             placeholder="Preço"
             required
-            value={transaction.price}
+            defaultValue={transaction.price}
             {...register('price', { valueAsNumber: true })}
           />
           <input
             type="text"
             placeholder="Categoria"
             required
-            value={transaction.category}
+            defaultValue={transaction.category}
             {...register('category')}
           />
 
           <Controller
+            defaultValue={transaction.type}
             control={control}
             name="type"
-            render={({ field }) => {
-              return (
-                <TransactionType
-                  onValueChange={field.onChange}
-                  value={field.value || transaction.type}
-                >
-                  <TransactionTypeButton variant="income" value="income">
-                    <ArrowCircleUp size={24} />
-                    Entrada
-                  </TransactionTypeButton>
-                  <TransactionTypeButton variant="outcome" value="outcome">
-                    <ArrowCircleDown size={24} />
-                    Saída
-                  </TransactionTypeButton>
-                </TransactionType>
-              );
-            }}
+            render={({ field }) => (
+              <TransactionType
+                onValueChange={field.onChange}
+                value={field.value}
+              >
+                <TransactionTypeButton variant="income" value="income">
+                  <ArrowCircleUp size={24} />
+                  Entrada
+                </TransactionTypeButton>
+                <TransactionTypeButton variant="outcome" value="outcome">
+                  <ArrowCircleDown size={24} />
+                  Saída
+                </TransactionTypeButton>
+              </TransactionType>
+            )}
           />
 
           <button type="submit" disabled={isSubmitting}>
