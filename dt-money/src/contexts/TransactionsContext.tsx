@@ -1,8 +1,7 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { api } from '../lib/axios';
 import { createContext } from 'use-context-selector';
 import { dbTransactions } from '../lib/firebase';
-import { getDocs, addDoc } from '@firebase/firestore';
+import { getDocs, addDoc, query, orderBy } from '@firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Transaction {
@@ -36,9 +35,13 @@ export const TransactionsContext = createContext({} as TransactionContextType);
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const queryFilteredTransactions = query(
+    dbTransactions,
+    orderBy('createdAt', 'desc')
+  );
 
-  const fetchTransactions = useCallback(async (query?: string) => {
-    const transactionsSnapshot = await getDocs(dbTransactions);
+  const fetchTransactions = useCallback(async () => {
+    const transactionsSnapshot = await getDocs(queryFilteredTransactions);
     const transactionsList = transactionsSnapshot.docs.map(
       (doc) => doc.data() as Transaction
     );
@@ -47,8 +50,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   }, []);
 
   const filterTransactions = useCallback(async (query: string) => {
-    const transactionsSnapshot = await getDocs(dbTransactions);
-
+    const transactionsSnapshot = await getDocs(queryFilteredTransactions);
     const transactionsListFiltered = transactionsSnapshot.docs
       .map((doc) => doc.data() as Transaction)
       .filter((transaction) =>

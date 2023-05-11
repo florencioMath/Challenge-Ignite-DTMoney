@@ -1,10 +1,17 @@
 import { Header } from '../../components/Header';
 import { Summary } from '../../components/Summary';
-import { TransactionAmount, TransactionsContainer } from './styles';
+import {
+  Root,
+  TransactionAmount,
+  TransactionsContainer,
+  Trigger,
+} from './styles';
 import { useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { CardTransactions } from './components/CardTransaction';
 import { SearchForm } from './components/SearchForm/SearchForm';
+import * as Dialog from '@radix-ui/react-dialog';
+import { CardTransactionModal } from '../../components/CardTransactionModal';
 
 export function Transactions() {
   const transactions = useContextSelector(TransactionsContext, (context) => {
@@ -27,7 +34,13 @@ export function Transactions() {
         {transactions.map((transaction) => {
           return (
             <div key={transaction.id}>
-              <CardTransactions transaction={transaction} />
+              <Root>
+                <Trigger>
+                  <CardTransactions transaction={transaction} />
+                </Trigger>
+
+                <CardTransactionModal transaction={transaction} />
+              </Root>
             </div>
           );
         })}

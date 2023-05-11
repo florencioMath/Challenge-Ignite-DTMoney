@@ -1,5 +1,17 @@
 import styled from 'styled-components';
 
+import * as Dialog from '@radix-ui/react-dialog';
+
+export const Root = styled(Dialog.Root)`
+  all: unset;
+`;
+
+export const Trigger = styled(Dialog.Trigger)`
+  all: unset;
+  width: 100%;
+  cursor: pointer;
+`;
+
 export const TransactionsContainer = styled.main`
   width: 100%;
   max-width: 1120px;

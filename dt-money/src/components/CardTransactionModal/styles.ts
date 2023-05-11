@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 import * as Dialog from '@radix-ui/react-dialog';
 import * as RadioGroup from '@radix-ui/react-radio-group';
 
@@ -138,5 +139,27 @@ export const TransactionTypeButton = styled(
     svg {
       color: ${(props) => props.theme.white};
     }
+  }
+`;
+
+export const ButtonDelete = styled.button`
+  height: 50px;
+  border: 0;
+  background: ${(props) => props.theme['red-500']};
+  color: ${(props) => props.theme.white};
+  font-weight: bold;
+  padding: 0 1.25rem;
+  border-radius: 6px;
+  margin-top: 0.25rem;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    background: ${(props) => props.theme['red-700']};
+    transition: background-color 0.2s;
   }
 `;
