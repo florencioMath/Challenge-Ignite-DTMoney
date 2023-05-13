@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { createContext } from 'use-context-selector';
-import { db, dbTransactions } from '../lib/firebase';
+import { dbTransactions } from '../lib/firebase';
 import {
   getDocs,
   addDoc,
@@ -9,10 +9,9 @@ import {
   doc,
   updateDoc,
 } from '@firebase/firestore';
-import { v4 as uuidv4 } from 'uuid';
 
 interface Transaction {
-  id: string;
+  id?: string;
   description: string;
   price: number;
   category: string;
@@ -58,7 +57,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const fetchTransactions = useCallback(async () => {
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
     const transactionsList = transactionsSnapshot.docs.map(
-      (doc) => doc.data() as Transaction
+      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
 
     return setTransactions(transactionsList);
@@ -82,7 +81,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       const { description, price, category, type } = data;
 
       const transaction = {
-        id: uuidv4(),
         description,
         price,
         category,
@@ -98,13 +96,9 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   );
 
   const updateTransaction = async (id: string, data: any) => {
-    try {
-      const transactionRef = doc(dbTransactions, id);
-      await updateDoc(transactionRef, data);
-      console.log(`Transaction ${id} updated successfully.`);
-    } catch (error) {
-      console.error('Error updating document:', error);
-    }
+    const transactionRef = doc(dbTransactions, id);
+    await updateDoc(transactionRef, data);
+    fetchTransactions();
   };
 
   useEffect(() => {
