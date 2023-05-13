@@ -11,6 +11,8 @@ import { ArrowCircleDown, ArrowCircleUp, FileDoc, X } from 'phosphor-react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { useContextSelector } from 'use-context-selector';
+import { TransactionsContext } from '../../contexts/TransactionsContext';
 
 interface Transaction {
   id: string;
@@ -44,8 +46,18 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
     resolver: zodResolver(editTransactionFormScheme),
   });
 
-  function handleEditTransaction(data: EditTransactionsFormInput) {
-    // console.log(data);
+  const updateTransaction = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return context.updateTransaction;
+    }
+  );
+
+  async function handleUpdateTransaction(data: EditTransactionsFormInput) {
+    console.log('handleUpdateTransaction - MODAL', data);
+    console.log('transaction ID', transaction.id);
+
+    await updateTransaction(transaction.id, data);
   }
 
   return (
@@ -59,7 +71,7 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
           <X size={24} />
         </CloseButton>
 
-        <form onSubmit={handleSubmit(handleEditTransaction)}>
+        <form onSubmit={handleSubmit(handleUpdateTransaction)}>
           <input
             type="text"
             placeholder="Descrição"

@@ -1,7 +1,14 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { createContext } from 'use-context-selector';
-import { dbTransactions } from '../lib/firebase';
-import { getDocs, addDoc, query, orderBy } from '@firebase/firestore';
+import { db, dbTransactions } from '../lib/firebase';
+import {
+  getDocs,
+  addDoc,
+  query,
+  orderBy,
+  doc,
+  updateDoc,
+} from '@firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
 interface Transaction {
@@ -25,6 +32,7 @@ interface TransactionContextType {
   fetchTransactions: () => Promise<void>;
   filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
+  updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
 }
 
 interface TransactionsProviderProps {
@@ -32,6 +40,13 @@ interface TransactionsProviderProps {
 }
 
 export const TransactionsContext = createContext({} as TransactionContextType);
+
+type EditTransactionInput = {
+  description: string;
+  price: number;
+  category: string;
+  type: 'income' | 'outcome';
+};
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -82,6 +97,16 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     []
   );
 
+  const updateTransaction = async (id: string, data: any) => {
+    try {
+      const transactionRef = doc(dbTransactions, id);
+      await updateDoc(transactionRef, data);
+      console.log(`Transaction ${id} updated successfully.`);
+    } catch (error) {
+      console.error('Error updating document:', error);
+    }
+  };
+
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
@@ -93,6 +118,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         fetchTransactions,
         createTransaction,
         filterTransactions,
+        updateTransaction,
       }}
     >
       {children}
