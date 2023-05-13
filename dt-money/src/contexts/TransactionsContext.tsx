@@ -1,8 +1,15 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { createContext } from 'use-context-selector';
 import { dbTransactions } from '../lib/firebase';
-import { getDocs, addDoc, query, orderBy } from '@firebase/firestore';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  getDocs,
+  addDoc,
+  query,
+  orderBy,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from '@firebase/firestore';
 
 interface Transaction {
   id: string;
@@ -25,6 +32,8 @@ interface TransactionContextType {
   fetchTransactions: () => Promise<void>;
   filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
+  updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
 }
 
 interface TransactionsProviderProps {
@@ -32,6 +41,13 @@ interface TransactionsProviderProps {
 }
 
 export const TransactionsContext = createContext({} as TransactionContextType);
+
+type EditTransactionInput = {
+  description: string;
+  price: number;
+  category: string;
+  type: 'income' | 'outcome';
+};
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -43,7 +59,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const fetchTransactions = useCallback(async () => {
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
     const transactionsList = transactionsSnapshot.docs.map(
-      (doc) => doc.data() as Transaction
+      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
 
     return setTransactions(transactionsList);
@@ -67,7 +83,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       const { description, price, category, type } = data;
 
       const transaction = {
-        id: uuidv4(),
         description,
         price,
         category,
@@ -77,10 +92,22 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
       await addDoc(dbTransactions, transaction);
 
-      setTransactions((state) => [transaction, ...state]);
+      fetchTransactions();
     },
     []
   );
+
+  const updateTransaction = useCallback(async (id: string, data: any) => {
+    const transactionRef = doc(dbTransactions, id);
+    await updateDoc(transactionRef, data);
+    fetchTransactions();
+  }, []);
+
+  const deleteTransaction = useCallback(async (id: string) => {
+    const transactionToDelete = doc(dbTransactions, id);
+    await deleteDoc(transactionToDelete);
+    fetchTransactions();
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
@@ -93,6 +120,8 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         fetchTransactions,
         createTransaction,
         filterTransactions,
+        updateTransaction,
+        deleteTransaction,
       }}
     >
       {children}

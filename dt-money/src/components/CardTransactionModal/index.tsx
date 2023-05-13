@@ -10,6 +10,8 @@ import {
 import { ArrowCircleDown, ArrowCircleUp, FileDoc, X } from 'phosphor-react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useContextSelector } from 'use-context-selector';
+import { TransactionsContext } from '../../contexts/TransactionsContext';
 import * as z from 'zod';
 
 interface Transaction {
@@ -44,8 +46,26 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
     resolver: zodResolver(editTransactionFormScheme),
   });
 
-  function handleEditTransaction(data: EditTransactionsFormInput) {
-    // console.log(data);
+  const updateTransaction = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return context.updateTransaction;
+    }
+  );
+
+  const deleteTransaction = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return context.deleteTransaction;
+    }
+  );
+
+  async function handleUpdateTransaction(data: EditTransactionsFormInput) {
+    await updateTransaction(transaction.id, data);
+  }
+
+  async function handleDeleteTransaction(id: string) {
+    await deleteTransaction(id);
   }
 
   return (
@@ -59,7 +79,7 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
           <X size={24} />
         </CloseButton>
 
-        <form onSubmit={handleSubmit(handleEditTransaction)}>
+        <form onSubmit={handleSubmit(handleUpdateTransaction)}>
           <input
             type="text"
             placeholder="Descrição"
@@ -106,7 +126,9 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
           <button type="submit" disabled={isSubmitting}>
             Alterar
           </button>
-          <ButtonDelete>Excluir</ButtonDelete>
+          <ButtonDelete onClick={() => handleDeleteTransaction(transaction.id)}>
+            Excluir
+          </ButtonDelete>
         </form>
       </Content>
     </Dialog.Portal>
