@@ -95,11 +95,11 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     []
   );
 
-  const updateTransaction = async (id: string, data: any) => {
+  const updateTransaction = useCallback(async (id: string, data: any) => {
     const transactionRef = doc(dbTransactions, id);
     await updateDoc(transactionRef, data);
     fetchTransactions();
-  };
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
