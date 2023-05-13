@@ -12,7 +12,7 @@ import {
 } from '@firebase/firestore';
 
 interface Transaction {
-  id?: string;
+  id: string;
   description: string;
   price: number;
   category: string;
