@@ -8,6 +8,7 @@ import {
   orderBy,
   doc,
   updateDoc,
+  deleteDoc,
 } from '@firebase/firestore';
 
 interface Transaction {
@@ -32,6 +33,7 @@ interface TransactionContextType {
   filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
+  deleteTransaction: (id: string) => Promise<void>;
 }
 
 interface TransactionsProviderProps {
@@ -90,7 +92,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
       await addDoc(dbTransactions, transaction);
 
-      setTransactions((state) => [transaction, ...state]);
+      fetchTransactions();
     },
     []
   );
@@ -98,6 +100,12 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const updateTransaction = useCallback(async (id: string, data: any) => {
     const transactionRef = doc(dbTransactions, id);
     await updateDoc(transactionRef, data);
+    fetchTransactions();
+  }, []);
+
+  const deleteTransaction = useCallback(async (id: string) => {
+    const transactionToDelete = doc(dbTransactions, id);
+    await deleteDoc(transactionToDelete);
     fetchTransactions();
   }, []);
 
@@ -113,6 +121,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         createTransaction,
         filterTransactions,
         updateTransaction,
+        deleteTransaction,
       }}
     >
       {children}

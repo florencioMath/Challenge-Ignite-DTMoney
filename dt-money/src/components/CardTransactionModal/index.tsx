@@ -53,8 +53,19 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
     }
   );
 
+  const deleteTransaction = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return context.deleteTransaction;
+    }
+  );
+
   async function handleUpdateTransaction(data: EditTransactionsFormInput) {
     await updateTransaction(transaction.id, data);
+  }
+
+  async function handleDeleteTransaction(id: string) {
+    await deleteTransaction(id);
   }
 
   return (
@@ -115,7 +126,9 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
           <button type="submit" disabled={isSubmitting}>
             Alterar
           </button>
-          <ButtonDelete>Excluir</ButtonDelete>
+          <ButtonDelete onClick={() => handleDeleteTransaction(transaction.id)}>
+            Excluir
+          </ButtonDelete>
         </form>
       </Content>
     </Dialog.Portal>
