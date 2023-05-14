@@ -3,6 +3,7 @@ import {
   ButtonDelete,
   CloseButton,
   Content,
+  ErrorMessage,
   Overlay,
   TransactionType,
   TransactionTypeButton,
@@ -28,9 +29,15 @@ interface TransactionProps {
 }
 
 const editTransactionFormScheme = z.object({
-  description: z.string(),
+  description: z
+    .string()
+    .min(2, 'A descriçao deve ter no mínimo 2 caracteres.')
+    .max(32, 'A categoria dever ter no máximo 32 caracteres.'),
   price: z.number(),
-  category: z.string(),
+  category: z
+    .string()
+    .min(2, 'A categoria dever ter no mínimo 2 caracteres.')
+    .max(32, 'A categoria dever ter no máximo 32 caracteres.'),
   type: z.enum(['income', 'outcome']),
 });
 
@@ -41,7 +48,7 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
     register,
     control,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<EditTransactionsFormInput>({
     resolver: zodResolver(editTransactionFormScheme),
   });
@@ -87,6 +94,10 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
             defaultValue={transaction.description}
             {...register('description')}
           />
+          {errors.description && (
+            <ErrorMessage>{errors.description?.message}</ErrorMessage>
+          )}
+
           <input
             type="number"
             placeholder="Preço"
@@ -94,6 +105,7 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
             defaultValue={transaction.price}
             {...register('price', { valueAsNumber: true })}
           />
+
           <input
             type="text"
             placeholder="Categoria"
@@ -101,6 +113,9 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
             defaultValue={transaction.category}
             {...register('category')}
           />
+          {errors.category && (
+            <ErrorMessage>{errors.category?.message}</ErrorMessage>
+          )}
 
           <Controller
             defaultValue={transaction.type}

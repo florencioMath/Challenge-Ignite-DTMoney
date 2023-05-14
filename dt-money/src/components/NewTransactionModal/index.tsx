@@ -7,6 +7,7 @@ import { Controller, useForm } from 'react-hook-form';
 import {
   CloseButton,
   Content,
+  ErrorMessage,
   Overlay,
   TransactionType,
   TransactionTypeButton,
@@ -15,9 +16,15 @@ import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { useContextSelector } from 'use-context-selector';
 
 const newTransctionFormSchema = z.object({
-  description: z.string(),
+  description: z
+    .string()
+    .min(2, 'A descriçao deve ter no mínimo 2 caracteres.')
+    .max(32, 'A categoria dever ter no máximo 32 caracteres.'),
   price: z.number(),
-  category: z.string(),
+  category: z
+    .string()
+    .min(2, 'A categoria dever ter no mínimo 2 caracteres.')
+    .max(32, 'A categoria dever ter no máximo 32 caracteres.'),
   type: z.enum(['income', 'outcome']),
 });
 
@@ -28,7 +35,7 @@ export function NewTransacitionModal() {
     control,
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
     reset,
   } = useForm<NewTransactionFormInputs>({
     resolver: zodResolver(newTransctionFormSchema),
@@ -73,18 +80,26 @@ export function NewTransacitionModal() {
             required
             {...register('description')}
           />
+          {errors.description && (
+            <ErrorMessage>{errors.description?.message}</ErrorMessage>
+          )}
+
           <input
             type="number"
             placeholder="Preço"
             required
             {...register('price', { valueAsNumber: true })}
           />
+
           <input
             type="text"
             placeholder="Categoria"
             required
             {...register('category')}
           />
+          {errors.category && (
+            <ErrorMessage>{errors.category?.message}</ErrorMessage>
+          )}
 
           <Controller
             control={control}

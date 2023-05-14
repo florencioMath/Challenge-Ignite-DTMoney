@@ -77,6 +77,16 @@ export const Content = styled(Dialog.Content)`
   }
 `;
 
+export const ErrorMessage = styled.span`
+  padding: 0.5rem;
+  border-radius: 6px;
+
+  background: ${(props) => props.theme['red-700']};
+  color: ${(props) => props.theme['white']};
+
+  opacity: 0.8;
+`;
+
 export const CloseButton = styled(Dialog.Close)`
   position: absolute;
   background: transparent;
