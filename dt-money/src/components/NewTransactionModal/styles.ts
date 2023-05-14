@@ -21,9 +21,10 @@ export const Content = styled(Dialog.Content)`
   left: 50%;
   transform: translate(-50%, -50%);
 
-  @media screen and (max-width: 390px) {
+  @media screen and (max-width: 560px) {
     min-width: 100%;
     padding: 1.5rem;
+    border-radius: 6px 6px 0 0;
 
     top: auto;
     bottom: 0;
@@ -36,7 +37,7 @@ export const Content = styled(Dialog.Content)`
     flex-direction: column;
     gap: 1rem;
 
-    @media screen and (max-width: 390px) {
+    @media screen and (max-width: 560px) {
       margin: 1.5rem 0;
     }
 
