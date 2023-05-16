@@ -37,13 +37,14 @@ Esse projeto foi desenvolvido com as seguintes tecnologias:
 - Styled Components
 - Figma
 - Vercel
+  - Environment Variables
+- Firebase
 
 ## 💻 Projeto
 
 O DT Money é um aplicativo de controlo financeiro, onde o usuario poderá adicioar entradas e saídas e fazer buscas nas transações cadastradas. <br/>
 Esse é o terceiro projeto desenvolvido durante a Trilha Ignite de ReactJS.
 
-- ✋ Site está em desenvolvimento, ele poderá apresentar comportamento inesperado!
 - [Acesse o deploy do projeto, na Vercel](https://florenciomath-dtmoney.vercel.app/)
 
 
@@ -69,7 +70,7 @@ https://github.com/florencioMath/Challenge-Ignite-CoffeeDelivery.git
 ```
 2. Entre na pasta e instale as dependências
 ```sh
-$ cd coffeeDelivery
+$ cd dt-money
 $ npm install
 ```
 3. Inicie o projeto
