@@ -10,7 +10,6 @@ import { useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { CardTransactions } from './components/CardTransaction';
 import { SearchForm } from './components/SearchForm/SearchForm';
-import * as Dialog from '@radix-ui/react-dialog';
 import { CardTransactionModal } from '../../components/CardTransactionModal';
 
 export function Transactions() {
