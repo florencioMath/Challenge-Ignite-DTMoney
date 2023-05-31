@@ -58,6 +58,8 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   const fetchTransactions = useCallback(async () => {
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
+    console.log(transactionsSnapshot.size);
+
     const transactionsList = transactionsSnapshot.docs.map(
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
