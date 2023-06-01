@@ -6,8 +6,21 @@ import {
   ContainerPagination,
   PageNumber,
 } from './styles';
+import { useContextSelector } from 'use-context-selector';
+import { TransactionsContext } from '../../contexts/TransactionsContext';
 
 export function Pagination() {
+  const fetchNextTransactions = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return context.fetchNextTransactions;
+    }
+  );
+
+  async function handleNextTransaction() {
+    await fetchNextTransactions();
+  }
+
   return (
     <ContainerPagination>
       <ButtonLeft>
@@ -18,7 +31,7 @@ export function Pagination() {
         <PageNumber>2</PageNumber>
         <PageNumber>3</PageNumber>
       </ContainerPageNumber>
-      <ButtonRight>
+      <ButtonRight onClick={() => handleNextTransaction()}>
         <CaretRight size={24} weight='bold' />
       </ButtonRight>
     </ContainerPagination>
