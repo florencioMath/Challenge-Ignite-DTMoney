@@ -9,6 +9,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  limit,
+  startAfter,
 } from '@firebase/firestore';
 
 interface Transaction {
@@ -30,6 +32,7 @@ interface CreateTransactionInput {
 interface TransactionContextType {
   transactions: Transaction[];
   fetchTransactions: () => Promise<void>;
+  fetchNextTransactions: () => Promise<void>;
   filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
@@ -53,12 +56,37 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const queryFilteredTransactions = query(
     dbTransactions,
-    orderBy('createdAt', 'desc')
+    orderBy('createdAt', 'desc'),
+    limit(10)
   );
 
   const fetchTransactions = useCallback(async () => {
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
+
     const transactionsList = transactionsSnapshot.docs.map(
+      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+    );
+
+    return setTransactions(transactionsList);
+  }, []);
+
+  const fetchNextTransactions = useCallback(async () => {
+    const allTransactionsSnapshot = await getDocs(queryFilteredTransactions);
+    const lastVisible =
+      allTransactionsSnapshot.docs[allTransactionsSnapshot.docs.length - 1];
+
+    const queryFilteredNextTransactions = query(
+      dbTransactions,
+      orderBy('createdAt', 'desc'),
+      startAfter(lastVisible),
+      limit(10)
+    );
+
+    const nextTransactionsSnapshot = await getDocs(
+      queryFilteredNextTransactions
+    );
+
+    const transactionsList = nextTransactionsSnapshot.docs.map(
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
 
@@ -111,6 +139,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   useEffect(() => {
     fetchTransactions();
+    // fetchNextTransactions();
   }, [fetchTransactions]);
 
   return (
@@ -118,6 +147,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       value={{
         transactions,
         fetchTransactions,
+        fetchNextTransactions,
         createTransaction,
         filterTransactions,
         updateTransaction,
