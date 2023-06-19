@@ -54,32 +54,56 @@ type EditTransactionInput = {
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [nextTransaction, setNextTransaction] = useState({});
+  const [lastTransaction, setLastTransacion] = useState({});
+  const transactiosPerPage = 3;
+
   const queryFilteredTransactions = query(
     dbTransactions,
     orderBy('createdAt', 'desc'),
-    limit(10)
+    limit(transactiosPerPage)
   );
 
+  const getTransactionsLength = useCallback(async () => {
+    const queryFilteredTransactions = query(
+      dbTransactions,
+      orderBy('createdAt', 'desc')
+    );
+
+    const transactionsSnapshot = await getDocs(queryFilteredTransactions);
+
+    const lastTransaction =
+      transactionsSnapshot.docs[transactionsSnapshot.docs.length - 1];
+
+    console.log('getTransactionsLength-> ', lastTransaction);
+
+    setLastTransacion(lastTransaction);
+  }, []);
+
   const fetchTransactions = useCallback(async () => {
+    getTransactionsLength();
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
 
     const transactionsList = transactionsSnapshot.docs.map(
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
+    setNextTransaction(
+      transactionsSnapshot.docs[transactionsSnapshot.docs.length - 1]
+    );
 
-    return setTransactions(transactionsList);
+    setTransactions(transactionsList);
   }, []);
 
   const fetchNextTransactions = useCallback(async () => {
-    const allTransactionsSnapshot = await getDocs(queryFilteredTransactions);
-    const lastVisible =
-      allTransactionsSnapshot.docs[allTransactionsSnapshot.docs.length - 1];
+    if (nextTransaction == lastTransaction) {
+      console.log('Não há mais transações');
+    }
 
     const queryFilteredNextTransactions = query(
       dbTransactions,
       orderBy('createdAt', 'desc'),
-      startAfter(lastVisible),
-      limit(10)
+      startAfter(nextTransaction),
+      limit(transactiosPerPage)
     );
 
     const nextTransactionsSnapshot = await getDocs(
@@ -90,8 +114,12 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
 
-    return setTransactions(transactionsList);
-  }, []);
+    setNextTransaction(
+      nextTransactionsSnapshot.docs[nextTransactionsSnapshot.docs.length - 1]
+    );
+
+    setTransactions(transactionsList);
+  }, [nextTransaction]);
 
   const filterTransactions = useCallback(async (query: string) => {
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
