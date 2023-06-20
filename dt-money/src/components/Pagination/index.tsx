@@ -1,39 +1,53 @@
 import { CaretLeft, CaretRight } from 'phosphor-react';
-import {
-  ButtonLeft,
-  ButtonRight,
-  ContainerPageNumber,
-  ContainerPagination,
-  PageNumber,
-} from './styles';
-import { useContextSelector } from 'use-context-selector';
+import { ButtonPassPage, ContainerPagination } from './styles';
+import { useContext, useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
+import { useState } from 'react';
 
 export function Pagination() {
-  const fetchNextTransactions = useContextSelector(
+  const { transactions, transactionsPerPage } = useContext(TransactionsContext);
+  const [actualPage, setActualPage] = useState(1);
+
+  const nextTransactions = useContextSelector(
     TransactionsContext,
     (context) => {
-      return context.fetchNextTransactions;
+      return context.nextTransactions;
+    }
+  );
+
+  const previousTransactions = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return context.previousTransactions;
     }
   );
 
   async function handleNextTransaction() {
-    await fetchNextTransactions();
+    await nextTransactions();
+    setActualPage(actualPage + 1);
+  }
+
+  async function handlePreviousTransaction() {
+    await previousTransactions();
+    setActualPage(actualPage - 1);
   }
 
   return (
     <ContainerPagination>
-      <ButtonLeft>
+      <ButtonPassPage
+        onClick={() => handlePreviousTransaction()}
+        disabled={actualPage === 1}
+      >
         <CaretLeft size={24} weight='bold' />
-      </ButtonLeft>
-      <ContainerPageNumber>
-        <PageNumber>1</PageNumber>
-        <PageNumber>2</PageNumber>
-        <PageNumber>3</PageNumber>
-      </ContainerPageNumber>
-      <ButtonRight onClick={() => handleNextTransaction()}>
+        Anteriores
+      </ButtonPassPage>
+      <ButtonPassPage
+        onClick={() => handleNextTransaction()}
+        disabled={transactions.length < transactionsPerPage}
+      >
+        Próximas
         <CaretRight size={24} weight='bold' />
-      </ButtonRight>
+      </ButtonPassPage>
     </ContainerPagination>
   );
 }

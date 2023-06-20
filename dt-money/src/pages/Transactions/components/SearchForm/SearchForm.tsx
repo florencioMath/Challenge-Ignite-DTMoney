@@ -8,7 +8,7 @@ import { TransactionsContext } from '../../../../contexts/TransactionsContext';
 import { memo } from 'react';
 
 const searchFormSchema = z.object({
-  query: z.string(),
+  query: z.string().min(3, 'A busca deve conter no mínimo 3 caracteres'),
 });
 
 type SearchFormInputs = z.infer<typeof searchFormSchema>;
@@ -22,26 +22,26 @@ function SearchFormComponent() {
     resolver: zodResolver(searchFormSchema),
   });
 
-  const filterTransactions = useContextSelector(
+  const searchTransactions = useContextSelector(
     TransactionsContext,
     (context) => {
-      return context.filterTransactions;
+      return context.searchTransactions;
     }
   );
 
   async function handleSearchTransactions(data: SearchFormInputs) {
-    await filterTransactions(data.query);
+    await searchTransactions(data.query);
   }
 
   return (
     <SearchFormContainer onSubmit={handleSubmit(handleSearchTransactions)}>
       <input
-        type="text"
-        placeholder="Busque por transações"
+        type='text'
+        placeholder='Busque por transações'
         {...register('query')}
       />
 
-      <button type="submit" disabled={isSubmitting}>
+      <button type='submit' disabled={isSubmitting}>
         <MagnifyingGlass size={20} />
         <span>Buscar</span>
       </button>

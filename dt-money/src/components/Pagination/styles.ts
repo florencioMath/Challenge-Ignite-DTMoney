@@ -10,43 +10,25 @@ export const ContainerPagination = styled.div`
   gap: 16px;
 `;
 
-export const ContainerPageNumber = styled.div`
+export const ButtonPassPage = styled.button`
+  all: unset;
+  cursor: pointer;
+  color: ${(props) => props.theme['gray-300']};
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-direction: row;
 
-  gap: 8px;
-`;
-
-export const PageNumber = styled.button`
-  all: unset;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-
-  background: ${(props) => props.theme['gray-600']};
-  color: ${(props) => props.theme['gray-400']};
-
-  height: 40px;
-  width: 40px;
+  padding: 0.5rem;
   border-radius: 6px;
 
-  font-family: Roboto, sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 140%;
-`;
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 
-export const ButtonLeft = styled.button`
-  all: unset;
-  cursor: pointer;
-  color: ${(props) => props.theme['gray-600']};
-`;
-
-export const ButtonRight = styled.button`
-  all: unset;
-  cursor: pointer;
-  color: ${(props) => props.theme['gray-600']};
+  &:not(:disabled):hover {
+    color: ${(props) => props.theme['green-500']};
+  }
 `;

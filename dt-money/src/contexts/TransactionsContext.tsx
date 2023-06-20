@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { createContext } from 'use-context-selector';
-import { dbTransactions } from '../lib/firebase';
+import { transactionsCollection } from '../lib/firebase';
 import {
   getDocs,
   addDoc,
@@ -11,6 +11,8 @@ import {
   deleteDoc,
   limit,
   startAfter,
+  endBefore,
+  limitToLast,
 } from '@firebase/firestore';
 
 interface Transaction {
@@ -32,11 +34,13 @@ interface CreateTransactionInput {
 interface TransactionContextType {
   transactions: Transaction[];
   fetchTransactions: () => Promise<void>;
-  fetchNextTransactions: () => Promise<void>;
-  filterTransactions: (query: string) => Promise<void>;
+  nextTransactions: () => Promise<void>;
+  previousTransactions: () => Promise<void>;
+  searchTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
+  transactionsPerPage: number;
 }
 
 interface TransactionsProviderProps {
@@ -54,10 +58,12 @@ type EditTransactionInput = {
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const transactionsPerPage = 10;
+
   const queryFilteredTransactions = query(
-    dbTransactions,
+    transactionsCollection,
     orderBy('createdAt', 'desc'),
-    limit(10)
+    limit(transactionsPerPage)
   );
 
   const fetchTransactions = useCallback(async () => {
@@ -67,19 +73,15 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
 
-    return setTransactions(transactionsList);
+    setTransactions(transactionsList);
   }, []);
 
-  const fetchNextTransactions = useCallback(async () => {
-    const allTransactionsSnapshot = await getDocs(queryFilteredTransactions);
-    const lastVisible =
-      allTransactionsSnapshot.docs[allTransactionsSnapshot.docs.length - 1];
-
+  const nextTransactions = useCallback(async () => {
     const queryFilteredNextTransactions = query(
-      dbTransactions,
+      transactionsCollection,
       orderBy('createdAt', 'desc'),
-      startAfter(lastVisible),
-      limit(10)
+      startAfter(transactions[transactions.length - 1].createdAt),
+      limit(transactionsPerPage)
     );
 
     const nextTransactionsSnapshot = await getDocs(
@@ -90,13 +92,40 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
 
-    return setTransactions(transactionsList);
-  }, []);
+    setTransactions(transactionsList);
+  }, [transactions]);
 
-  const filterTransactions = useCallback(async (query: string) => {
-    const transactionsSnapshot = await getDocs(queryFilteredTransactions);
+  const previousTransactions = useCallback(async () => {
+    const queryFilteredNextTransactions = query(
+      transactionsCollection,
+      orderBy('createdAt', 'desc'),
+      endBefore(transactions[0].createdAt),
+      limitToLast(transactionsPerPage)
+    );
+
+    const previousTransactionsSnapshot = await getDocs(
+      queryFilteredNextTransactions
+    );
+
+    const transactionsList = previousTransactionsSnapshot.docs.map(
+      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+    );
+
+    setTransactions(transactionsList);
+  }, [transactions]);
+
+  const queryFilteredForSearchTransactions = query(
+    transactionsCollection,
+    orderBy('createdAt', 'desc')
+  );
+
+  const searchTransactions = useCallback(async (query: string) => {
+    const transactionsSnapshot = await getDocs(
+      queryFilteredForSearchTransactions
+    );
+
     const transactionsListFiltered = transactionsSnapshot.docs
-      .map((doc) => doc.data() as Transaction)
+      .map((doc) => ({ ...doc.data(), id: doc.id } as Transaction))
       .filter((transaction) =>
         transaction.description
           .toLowerCase()
@@ -118,7 +147,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         createdAt: new Date().toISOString(),
       };
 
-      await addDoc(dbTransactions, transaction);
+      await addDoc(transactionsCollection, transaction);
 
       fetchTransactions();
     },
@@ -126,20 +155,19 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   );
 
   const updateTransaction = useCallback(async (id: string, data: any) => {
-    const transactionRef = doc(dbTransactions, id);
+    const transactionRef = doc(transactionsCollection, id);
     await updateDoc(transactionRef, data);
     fetchTransactions();
   }, []);
 
   const deleteTransaction = useCallback(async (id: string) => {
-    const transactionToDelete = doc(dbTransactions, id);
+    const transactionToDelete = doc(transactionsCollection, id);
     await deleteDoc(transactionToDelete);
     fetchTransactions();
   }, []);
 
   useEffect(() => {
     fetchTransactions();
-    // fetchNextTransactions();
   }, [fetchTransactions]);
 
   return (
@@ -147,11 +175,13 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       value={{
         transactions,
         fetchTransactions,
-        fetchNextTransactions,
+        nextTransactions,
+        previousTransactions,
         createTransaction,
-        filterTransactions,
+        searchTransactions,
         updateTransaction,
         deleteTransaction,
+        transactionsPerPage,
       }}
     >
       {children}
