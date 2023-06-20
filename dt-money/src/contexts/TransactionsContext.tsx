@@ -40,7 +40,7 @@ interface TransactionContextType {
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
-  moreTransactionToShow: boolean;
+  transactionsPerPage: number;
 }
 
 interface TransactionsProviderProps {
@@ -58,13 +58,12 @@ type EditTransactionInput = {
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [moreTransactionToShow, setMoreTransactionToShow] = useState(false);
-  const transactiosPerPage = 3;
+  const transactionsPerPage = 10;
 
   const queryFilteredTransactions = query(
     transactionsCollection,
     orderBy('createdAt', 'desc'),
-    limit(transactiosPerPage)
+    limit(transactionsPerPage)
   );
 
   const fetchTransactions = useCallback(async () => {
@@ -81,8 +80,8 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     const queryFilteredNextTransactions = query(
       transactionsCollection,
       orderBy('createdAt', 'desc'),
-      startAfter(transactions[transactions.length - 1]!.createdAt),
-      limit(transactiosPerPage)
+      startAfter(transactions[transactions.length - 1].createdAt),
+      limit(transactionsPerPage)
     );
 
     const nextTransactionsSnapshot = await getDocs(
@@ -94,18 +93,14 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     );
 
     setTransactions(transactionsList);
-
-    if (transactionsList.length < transactiosPerPage) {
-      setMoreTransactionToShow(!moreTransactionToShow);
-    }
   }, [transactions]);
 
   const previousTransactions = useCallback(async () => {
     const queryFilteredNextTransactions = query(
       transactionsCollection,
       orderBy('createdAt', 'desc'),
-      endBefore(transactions[0]!.createdAt),
-      limitToLast(transactiosPerPage)
+      endBefore(transactions[0].createdAt),
+      limitToLast(transactionsPerPage)
     );
 
     const previousTransactionsSnapshot = await getDocs(
@@ -165,7 +160,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   useEffect(() => {
     fetchTransactions();
-    // nextTransactions();
   }, [fetchTransactions]);
 
   return (
@@ -179,7 +173,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         filterTransactions,
         updateTransaction,
         deleteTransaction,
-        moreTransactionToShow,
+        transactionsPerPage,
       }}
     >
       {children}
