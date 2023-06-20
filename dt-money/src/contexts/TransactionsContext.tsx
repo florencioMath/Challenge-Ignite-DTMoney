@@ -36,7 +36,7 @@ interface TransactionContextType {
   fetchTransactions: () => Promise<void>;
   nextTransactions: () => Promise<void>;
   previousTransactions: () => Promise<void>;
-  filterTransactions: (query: string) => Promise<void>;
+  searchTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
@@ -114,10 +114,18 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     setTransactions(transactionsList);
   }, [transactions]);
 
-  const filterTransactions = useCallback(async (query: string) => {
-    const transactionsSnapshot = await getDocs(queryFilteredTransactions);
+  const queryFilteredForSearchTransactions = query(
+    transactionsCollection,
+    orderBy('createdAt', 'desc')
+  );
+
+  const searchTransactions = useCallback(async (query: string) => {
+    const transactionsSnapshot = await getDocs(
+      queryFilteredForSearchTransactions
+    );
+
     const transactionsListFiltered = transactionsSnapshot.docs
-      .map((doc) => doc.data() as Transaction)
+      .map((doc) => ({ ...doc.data(), id: doc.id } as Transaction))
       .filter((transaction) =>
         transaction.description
           .toLowerCase()
@@ -170,7 +178,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         nextTransactions,
         previousTransactions,
         createTransaction,
-        filterTransactions,
+        searchTransactions,
         updateTransaction,
         deleteTransaction,
         transactionsPerPage,
