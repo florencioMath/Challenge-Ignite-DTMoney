@@ -32,11 +32,12 @@ interface CreateTransactionInput {
 interface TransactionContextType {
   transactions: Transaction[];
   fetchTransactions: () => Promise<void>;
-  fetchNextTransactions: () => Promise<void>;
+  nextTransactions: () => Promise<void>;
   filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
+  moreTransactionToShow: boolean;
 }
 
 interface TransactionsProviderProps {
@@ -55,7 +56,7 @@ type EditTransactionInput = {
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [nextTransaction, setNextTransaction] = useState({});
-  const [lastTransaction, setLastTransacion] = useState({});
+  const [moreTransactionToShow, setMoreTransactionToShow] = useState(false);
   const transactiosPerPage = 3;
 
   const queryFilteredTransactions = query(
@@ -64,24 +65,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     limit(transactiosPerPage)
   );
 
-  const getTransactionsLength = useCallback(async () => {
-    const queryFilteredTransactions = query(
-      dbTransactions,
-      orderBy('createdAt', 'desc')
-    );
-
-    const transactionsSnapshot = await getDocs(queryFilteredTransactions);
-
-    const lastTransaction =
-      transactionsSnapshot.docs[transactionsSnapshot.docs.length - 1];
-
-    console.log('getTransactionsLength-> ', lastTransaction);
-
-    setLastTransacion(lastTransaction);
-  }, []);
-
   const fetchTransactions = useCallback(async () => {
-    getTransactionsLength();
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
 
     const transactionsList = transactionsSnapshot.docs.map(
@@ -94,11 +78,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     setTransactions(transactionsList);
   }, []);
 
-  const fetchNextTransactions = useCallback(async () => {
-    if (nextTransaction == lastTransaction) {
-      console.log('Não há mais transações');
-    }
-
+  const nextTransactions = useCallback(async () => {
     const queryFilteredNextTransactions = query(
       dbTransactions,
       orderBy('createdAt', 'desc'),
@@ -119,6 +99,10 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     );
 
     setTransactions(transactionsList);
+
+    if (transactionsList.length < transactiosPerPage) {
+      setMoreTransactionToShow(!moreTransactionToShow);
+    }
   }, [nextTransaction]);
 
   const filterTransactions = useCallback(async (query: string) => {
@@ -167,7 +151,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   useEffect(() => {
     fetchTransactions();
-    // fetchNextTransactions();
+    // nextTransactions();
   }, [fetchTransactions]);
 
   return (
@@ -175,11 +159,12 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       value={{
         transactions,
         fetchTransactions,
-        fetchNextTransactions,
+        nextTransactions,
         createTransaction,
         filterTransactions,
         updateTransaction,
         deleteTransaction,
+        moreTransactionToShow,
       }}
     >
       {children}

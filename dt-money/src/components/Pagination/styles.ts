@@ -43,10 +43,28 @@ export const ButtonLeft = styled.button`
   all: unset;
   cursor: pointer;
   color: ${(props) => props.theme['gray-600']};
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    color: ${(props) => props.theme['green-700']};
+  }
 `;
 
 export const ButtonRight = styled.button`
   all: unset;
   cursor: pointer;
   color: ${(props) => props.theme['gray-600']};
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):hover {
+    color: ${(props) => props.theme['green-700']};
+  }
 `;

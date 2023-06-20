@@ -6,24 +6,37 @@ import {
   ContainerPagination,
   PageNumber,
 } from './styles';
-import { useContextSelector } from 'use-context-selector';
+import { useContext, useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 
 export function Pagination() {
-  const fetchNextTransactions = useContextSelector(
+  const { moreTransactionToShow } = useContext(TransactionsContext);
+
+  const nextTransactions = useContextSelector(
     TransactionsContext,
     (context) => {
-      return context.fetchNextTransactions;
+      return context.nextTransactions;
     }
   );
 
+  // const fetchPreviousTransactions = useContextSelector(
+  //   TransactionsContext,
+  //   (context) => {
+  //     return context.fetchPreviousTransactions;
+  //   }
+  // );
+
   async function handleNextTransaction() {
-    await fetchNextTransactions();
+    await nextTransactions();
+  }
+
+  async function handlePreviousTransaction() {
+    // await fetchPreviousTransactions();
   }
 
   return (
     <ContainerPagination>
-      <ButtonLeft>
+      <ButtonLeft onClick={() => handlePreviousTransaction()}>
         <CaretLeft size={24} weight='bold' />
       </ButtonLeft>
       <ContainerPageNumber>
@@ -31,7 +44,10 @@ export function Pagination() {
         <PageNumber>2</PageNumber>
         <PageNumber>3</PageNumber>
       </ContainerPageNumber>
-      <ButtonRight onClick={() => handleNextTransaction()}>
+      <ButtonRight
+        onClick={() => handleNextTransaction()}
+        disabled={moreTransactionToShow}
+      >
         <CaretRight size={24} weight='bold' />
       </ButtonRight>
     </ContainerPagination>
