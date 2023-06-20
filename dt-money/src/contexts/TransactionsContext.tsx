@@ -1,6 +1,6 @@
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { createContext } from 'use-context-selector';
-import { dbTransactions } from '../lib/firebase';
+import { transactionsCollection } from '../lib/firebase';
 import {
   getDocs,
   addDoc,
@@ -11,6 +11,8 @@ import {
   deleteDoc,
   limit,
   startAfter,
+  endBefore,
+  limitToLast,
 } from '@firebase/firestore';
 
 interface Transaction {
@@ -33,6 +35,7 @@ interface TransactionContextType {
   transactions: Transaction[];
   fetchTransactions: () => Promise<void>;
   nextTransactions: () => Promise<void>;
+  previousTransactions: () => Promise<void>;
   filterTransactions: (query: string) => Promise<void>;
   createTransaction: (data: CreateTransactionInput) => Promise<void>;
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
@@ -55,12 +58,11 @@ type EditTransactionInput = {
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [nextTransaction, setNextTransaction] = useState({});
   const [moreTransactionToShow, setMoreTransactionToShow] = useState(false);
   const transactiosPerPage = 3;
 
   const queryFilteredTransactions = query(
-    dbTransactions,
+    transactionsCollection,
     orderBy('createdAt', 'desc'),
     limit(transactiosPerPage)
   );
@@ -71,18 +73,15 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     const transactionsList = transactionsSnapshot.docs.map(
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
-    setNextTransaction(
-      transactionsSnapshot.docs[transactionsSnapshot.docs.length - 1]
-    );
 
     setTransactions(transactionsList);
   }, []);
 
   const nextTransactions = useCallback(async () => {
     const queryFilteredNextTransactions = query(
-      dbTransactions,
+      transactionsCollection,
       orderBy('createdAt', 'desc'),
-      startAfter(nextTransaction),
+      startAfter(transactions[transactions.length - 1]!.createdAt),
       limit(transactiosPerPage)
     );
 
@@ -94,16 +93,31 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
     );
 
-    setNextTransaction(
-      nextTransactionsSnapshot.docs[nextTransactionsSnapshot.docs.length - 1]
-    );
-
     setTransactions(transactionsList);
 
     if (transactionsList.length < transactiosPerPage) {
       setMoreTransactionToShow(!moreTransactionToShow);
     }
-  }, [nextTransaction]);
+  }, [transactions]);
+
+  const previousTransactions = useCallback(async () => {
+    const queryFilteredNextTransactions = query(
+      transactionsCollection,
+      orderBy('createdAt', 'desc'),
+      endBefore(transactions[0]!.createdAt),
+      limitToLast(transactiosPerPage)
+    );
+
+    const previousTransactionsSnapshot = await getDocs(
+      queryFilteredNextTransactions
+    );
+
+    const transactionsList = previousTransactionsSnapshot.docs.map(
+      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+    );
+
+    setTransactions(transactionsList);
+  }, [transactions]);
 
   const filterTransactions = useCallback(async (query: string) => {
     const transactionsSnapshot = await getDocs(queryFilteredTransactions);
@@ -130,7 +144,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         createdAt: new Date().toISOString(),
       };
 
-      await addDoc(dbTransactions, transaction);
+      await addDoc(transactionsCollection, transaction);
 
       fetchTransactions();
     },
@@ -138,13 +152,13 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   );
 
   const updateTransaction = useCallback(async (id: string, data: any) => {
-    const transactionRef = doc(dbTransactions, id);
+    const transactionRef = doc(transactionsCollection, id);
     await updateDoc(transactionRef, data);
     fetchTransactions();
   }, []);
 
   const deleteTransaction = useCallback(async (id: string) => {
-    const transactionToDelete = doc(dbTransactions, id);
+    const transactionToDelete = doc(transactionsCollection, id);
     await deleteDoc(transactionToDelete);
     fetchTransactions();
   }, []);
@@ -160,6 +174,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         transactions,
         fetchTransactions,
         nextTransactions,
+        previousTransactions,
         createTransaction,
         filterTransactions,
         updateTransaction,

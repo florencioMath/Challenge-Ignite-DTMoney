@@ -12,4 +12,4 @@ const firebaseApp = initializeApp({
 });
 
 export const db = getFirestore(firebaseApp);
-export const dbTransactions = collection(db, 'transactions');
+export const transactionsCollection = collection(db, 'transactions');
