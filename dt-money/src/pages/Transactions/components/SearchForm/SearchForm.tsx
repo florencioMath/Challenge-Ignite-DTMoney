@@ -8,7 +8,7 @@ import { TransactionsContext } from '../../../../contexts/TransactionsContext';
 import { memo } from 'react';
 
 const searchFormSchema = z.object({
-  query: z.string().min(3, 'A busca deve conter no mínimo 3 caracteres'),
+  query: z.string().min(2, 'A busca deve conter no mínimo 3 caracteres'),
 });
 
 type SearchFormInputs = z.infer<typeof searchFormSchema>;

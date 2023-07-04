@@ -129,22 +129,18 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     setTransactions(transactionsList);
   }, [transactions]);
 
-  const queryFilteredForSearchTransactions = query(
-    transactionsCollection,
-    orderBy('createdAt', 'desc')
-  );
 
-  const searchTransactions = useCallback(async (query: string) => {
-    const transactionsSnapshot = await getDocs(
-      queryFilteredForSearchTransactions
-    );
+  const searchTransactions = useCallback(async (toSearch: string) => {
+    const transactionsSnapshot = await getDocs(query(transactionsCollection,
+      orderBy('createdAt', 'desc'),));
 
     const transactionsListFiltered = transactionsSnapshot.docs
       .map((doc) => ({ ...doc.data(), id: doc.id } as Transaction))
       .filter((transaction) =>
-        transaction.description
+        transaction.description.normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
           .toLowerCase()
-          .includes(query.toLocaleLowerCase())
+          .includes(toSearch.toString().toLocaleLowerCase())
       );
 
     setTransactions(transactionsListFiltered);
