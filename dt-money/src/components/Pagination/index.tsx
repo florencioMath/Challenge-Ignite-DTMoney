@@ -1,11 +1,11 @@
 import { CaretLeft, CaretRight } from 'phosphor-react';
-import { ButtonPassPage, ContainerPagination } from './styles';
+import { ButtonPassPage, ContainerPagination, TotalPages } from './styles';
 import { useContext, useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { useState } from 'react';
 
 export function Pagination() {
-  const { transactions, transactionsPerPage } = useContext(TransactionsContext);
+  const { transactions, transactionsPerPage, totalPages } = useContext(TransactionsContext);
   const [actualPage, setActualPage] = useState(1);
 
   const nextTransactions = useContextSelector(
@@ -39,13 +39,14 @@ export function Pagination() {
         disabled={actualPage === 1}
       >
         <CaretLeft size={24} weight='bold' />
-        Anteriores
+        Anterior
       </ButtonPassPage>
+      <TotalPages>{`Página ${actualPage} de ${totalPages}`}</TotalPages>
       <ButtonPassPage
         onClick={() => handleNextTransaction()}
         disabled={transactions.length < transactionsPerPage}
       >
-        Próximas
+        Próxima
         <CaretRight size={24} weight='bold' />
       </ButtonPassPage>
     </ContainerPagination>

@@ -41,6 +41,7 @@ interface TransactionContextType {
   updateTransaction: (id: string, data: EditTransactionInput) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   transactionsPerPage: number;
+  totalPages: number;
 }
 
 interface TransactionsProviderProps {
@@ -58,6 +59,7 @@ type EditTransactionInput = {
 
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
   const transactionsPerPage = 10;
 
   const queryFilteredTransactions = query(
@@ -74,6 +76,19 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     );
 
     setTransactions(transactionsList);
+  }, []);
+
+
+  const fetchAllTransactions = useCallback(async () => {
+    const transactionsSnapshot = await getDocs(query(transactionsCollection,
+      orderBy('createdAt', 'desc'),));
+
+    const transactionsList = transactionsSnapshot.docs.map(
+      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+    );
+
+    setTotalPages(Math.ceil(transactionsList.length / transactionsPerPage));
+
   }, []);
 
   const nextTransactions = useCallback(async () => {
@@ -168,6 +183,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
   useEffect(() => {
     fetchTransactions();
+    fetchAllTransactions()
   }, [fetchTransactions]);
 
   return (
@@ -182,6 +198,7 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         updateTransaction,
         deleteTransaction,
         transactionsPerPage,
+        totalPages
       }}
     >
       {children}
