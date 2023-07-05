@@ -41,7 +41,7 @@ export function Pagination() {
         <CaretLeft size={24} weight='bold' />
         Anterior
       </ButtonPassPage>
-      <TotalPages>{`Página ${actualPage} de ${totalPages}`}</TotalPages>
+      <TotalPages>{`${actualPage} de ${totalPages}`}</TotalPages>
       <ButtonPassPage
         onClick={() => handleNextTransaction()}
         disabled={transactions.length < transactionsPerPage}
