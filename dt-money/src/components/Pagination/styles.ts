@@ -10,10 +10,17 @@ export const ContainerPagination = styled.div`
   gap: 16px;
 `;
 
+export const TotalPages = styled.span`
+  padding: 0.5rem;
+  border-radius: 6px;
+  color: ${(props) => props.theme['gray-300']};
+  background: ${(props) => props.theme['gray-700']};
+`;
+
 export const ButtonPassPage = styled.button`
   all: unset;
   cursor: pointer;
-  color: ${(props) => props.theme['gray-300']};
+  color: ${(props) => props.theme['gray-100']};
 
   display: flex;
   align-items: center;
@@ -30,5 +37,6 @@ export const ButtonPassPage = styled.button`
 
   &:not(:disabled):hover {
     color: ${(props) => props.theme['green-500']};
+    background: none;
   }
 `;

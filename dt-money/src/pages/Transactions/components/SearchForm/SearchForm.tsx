@@ -8,7 +8,7 @@ import { TransactionsContext } from '../../../../contexts/TransactionsContext';
 import { memo } from 'react';
 
 const searchFormSchema = z.object({
-  query: z.string().min(3, 'A busca deve conter no mínimo 3 caracteres'),
+  query: z.string().min(2, 'A busca deve conter no mínimo 3 caracteres'),
 });
 
 type SearchFormInputs = z.infer<typeof searchFormSchema>;
@@ -29,8 +29,24 @@ function SearchFormComponent() {
     }
   );
 
+  const fetchTransactions = useContextSelector(
+    TransactionsContext,
+    (context) => {
+      return context.fetchTransactions;
+    }
+  )
+
   async function handleSearchTransactions(data: SearchFormInputs) {
     await searchTransactions(data.query);
+  }
+
+  async function handleEmpySearch(event: React.ChangeEvent<HTMLInputElement>) {
+    const input = event.target.value;
+
+    if (input === '') {
+      await fetchTransactions();
+    }
+
   }
 
   return (
@@ -39,6 +55,7 @@ function SearchFormComponent() {
         type='text'
         placeholder='Busque por transações'
         {...register('query')}
+        onChange={(e) => handleEmpySearch(e)}
       />
 
       <button type='submit' disabled={isSubmitting}>

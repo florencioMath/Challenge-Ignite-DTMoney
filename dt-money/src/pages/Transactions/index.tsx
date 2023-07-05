@@ -12,6 +12,7 @@ import { CardTransactions } from './components/CardTransaction';
 import { SearchForm } from './components/SearchForm/SearchForm';
 import { CardTransactionModal } from '../../components/CardTransactionModal';
 import { Pagination } from '../../components/Pagination';
+import NoTransactions from '../../components/NoTransactions';
 
 export function Transactions() {
   const transactions = useContextSelector(TransactionsContext, (context) => {
@@ -46,7 +47,11 @@ export function Transactions() {
         })}
       </TransactionsContainer>
 
-      <Pagination />
+      {transactions.length !== 0 ? (
+        <Pagination />
+      ) : (
+        <NoTransactions />
+      )}
     </div>
   );
 }
