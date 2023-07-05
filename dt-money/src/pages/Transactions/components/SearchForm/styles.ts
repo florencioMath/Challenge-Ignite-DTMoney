@@ -51,3 +51,8 @@ export const SearchFormContainer = styled.form`
     }
   }
 `;
+
+export const SpanErrorMessage = styled.span`
+  font-size: small;
+  color: ${(props) => props.theme['red-300']};
+`;

@@ -1,5 +1,5 @@
 import { MagnifyingGlass } from 'phosphor-react';
-import { SearchFormContainer } from './styles';
+import { SearchFormContainer, SpanErrorMessage } from './styles';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +17,7 @@ function SearchFormComponent() {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm<SearchFormInputs>({
     resolver: zodResolver(searchFormSchema),
   });
@@ -50,19 +50,23 @@ function SearchFormComponent() {
   }
 
   return (
-    <SearchFormContainer onSubmit={handleSubmit(handleSearchTransactions)}>
-      <input
-        type='text'
-        placeholder='Busque por transações'
-        {...register('query')}
-        onChange={(e) => handleEmpySearch(e)}
-      />
+    <>
+      <SearchFormContainer onSubmit={handleSubmit(handleSearchTransactions)}>
+        <input
+          type='text'
+          placeholder='Busque por transações'
+          {...register('query')}
+          onChange={(e) => handleEmpySearch(e)}
+        />
 
-      <button type='submit' disabled={isSubmitting}>
-        <MagnifyingGlass size={20} />
-        <span>Buscar</span>
-      </button>
-    </SearchFormContainer>
+        <button type='submit' disabled={isSubmitting}>
+          <MagnifyingGlass size={20} />
+          <span>Buscar</span>
+        </button>
+      </SearchFormContainer>
+      {errors.query && <SpanErrorMessage>{errors.query.message}</SpanErrorMessage>}
+    </>
+
   );
 }
 
