@@ -5,8 +5,7 @@ import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { useState } from 'react';
 
 export function Pagination() {
-  const { transactions, transactionsPerPage, totalPages } = useContext(TransactionsContext);
-  const [actualPage, setActualPage] = useState(1);
+  const { transactions, transactionsPerPage, totalPages, setActualPage, actualPage } = useContext(TransactionsContext);
 
   const nextTransactions = useContextSelector(
     TransactionsContext,
@@ -44,7 +43,7 @@ export function Pagination() {
       <TotalPages>{`${actualPage} de ${totalPages}`}</TotalPages>
       <ButtonPassPage
         onClick={() => handleNextTransaction()}
-        disabled={transactions.length < transactionsPerPage}
+        disabled={transactions.length < transactionsPerPage || actualPage === totalPages}
       >
         Próxima
         <CaretRight size={24} weight='bold' />
