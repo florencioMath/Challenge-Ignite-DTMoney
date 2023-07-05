@@ -44,7 +44,7 @@ export function Pagination() {
       <TotalPages>{`${actualPage} de ${totalPages}`}</TotalPages>
       <ButtonPassPage
         onClick={() => handleNextTransaction()}
-        disabled={transactions.length < transactionsPerPage}
+        disabled={transactions.length < transactionsPerPage || actualPage === totalPages}
       >
         Próxima
         <CaretRight size={24} weight='bold' />
