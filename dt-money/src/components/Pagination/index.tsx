@@ -5,8 +5,7 @@ import { TransactionsContext } from '../../contexts/TransactionsContext';
 import { useState } from 'react';
 
 export function Pagination() {
-  const { transactions, transactionsPerPage, totalPages } = useContext(TransactionsContext);
-  const [actualPage, setActualPage] = useState(1);
+  const { transactions, transactionsPerPage, totalPages, setActualPage, actualPage } = useContext(TransactionsContext);
 
   const nextTransactions = useContextSelector(
     TransactionsContext,

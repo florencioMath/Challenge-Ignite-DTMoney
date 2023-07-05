@@ -42,6 +42,8 @@ interface TransactionContextType {
   deleteTransaction: (id: string) => Promise<void>;
   transactionsPerPage: number;
   totalPages: number;
+  setActualPage: React.Dispatch<React.SetStateAction<number>>;
+  actualPage: number;
 }
 
 interface TransactionsProviderProps {
@@ -60,6 +62,7 @@ type EditTransactionInput = {
 export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [actualPage, setActualPage] = useState(1);
   const transactionsPerPage = 10;
 
   const queryFilteredTransactions = query(
@@ -77,7 +80,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
 
     setTransactions(transactionsList);
   }, []);
-
 
   const fetchAllTransactions = useCallback(async () => {
     const transactionsSnapshot = await getDocs(query(transactionsCollection,
@@ -129,7 +131,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     setTransactions(transactionsList);
   }, [transactions]);
 
-
   const searchTransactions = useCallback(async (toSearch: string) => {
     const transactionsSnapshot = await getDocs(query(transactionsCollection,
       orderBy('createdAt', 'desc'),));
@@ -161,6 +162,9 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
       await addDoc(transactionsCollection, transaction);
 
       fetchTransactions();
+      fetchAllTransactions()
+
+      setActualPage(1);
     },
     []
   );
@@ -175,6 +179,8 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     const transactionToDelete = doc(transactionsCollection, id);
     await deleteDoc(transactionToDelete);
     fetchTransactions();
+    fetchAllTransactions()
+    setActualPage(1);
   }, []);
 
   useEffect(() => {
@@ -194,7 +200,9 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         updateTransaction,
         deleteTransaction,
         transactionsPerPage,
-        totalPages
+        totalPages,
+        setActualPage,
+        actualPage,
       }}
     >
       {children}
