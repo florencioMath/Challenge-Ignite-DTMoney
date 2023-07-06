@@ -14,6 +14,7 @@ import {
   endBefore,
   limitToLast,
 } from '@firebase/firestore';
+import { toast } from 'sonner';
 
 interface Transaction {
   id: string;
@@ -65,86 +66,104 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [actualPage, setActualPage] = useState(1);
   const transactionsPerPage = 10;
 
-  const queryFilteredTransactions = query(
-    transactionsCollection,
-    orderBy('createdAt', 'desc'),
-    limit(transactionsPerPage)
-  );
-
   const fetchTransactions = useCallback(async () => {
-    const transactionsSnapshot = await getDocs(queryFilteredTransactions);
+    try {
+      const transactionsSnapshot = await getDocs(query(
+        transactionsCollection,
+        orderBy('createdAt', 'desc'),
+        limit(transactionsPerPage)
+      ));
 
-    const transactionsList = transactionsSnapshot.docs.map(
-      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
-    );
+      const transactionsList = transactionsSnapshot.docs.map(
+        (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+      );
 
-    setTransactions(transactionsList);
+      setTransactions(transactionsList);
+    } catch (error) {
+      console.log('Erro ao carregar as transações', error);
+    }
   }, []);
 
   const fetchAllTransactions = useCallback(async () => {
-    const transactionsSnapshot = await getDocs(query(transactionsCollection,
-      orderBy('createdAt', 'desc'),));
+    try {
+      const transactionsSnapshot = await getDocs(query(transactionsCollection,
+        orderBy('createdAt', 'desc'),));
 
-    const transactionsList = transactionsSnapshot.docs.map(
-      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
-    );
+      const transactionsList = transactionsSnapshot.docs.map(
+        (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+      );
 
-    setTotalPages(Math.ceil(transactionsList.length / transactionsPerPage));
-
+      setTotalPages(Math.ceil(transactionsList.length / transactionsPerPage));
+    } catch (error) {
+      console.log('Erro ao carregar todas as transações', error);
+    }
   }, []);
 
   const nextTransactions = useCallback(async () => {
-    const queryFilteredNextTransactions = query(
-      transactionsCollection,
-      orderBy('createdAt', 'desc'),
-      startAfter(transactions[transactions.length - 1].createdAt),
-      limit(transactionsPerPage)
-    );
+    try {
+      const queryFilteredNextTransactions = query(
+        transactionsCollection,
+        orderBy('createdAt', 'desc'),
+        startAfter(transactions[transactions.length - 1].createdAt),
+        limit(transactionsPerPage)
+      );
 
-    const nextTransactionsSnapshot = await getDocs(
-      queryFilteredNextTransactions
-    );
+      const nextTransactionsSnapshot = await getDocs(
+        queryFilteredNextTransactions
+      );
 
-    const transactionsList = nextTransactionsSnapshot.docs.map(
-      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
-    );
+      const transactionsList = nextTransactionsSnapshot.docs.map(
+        (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+      );
 
-    setTransactions(transactionsList);
+      setTransactions(transactionsList);
+    } catch {
+      toast.error('Erro ao carregar as próximas transações');
+    }
+
   }, [transactions]);
 
   const previousTransactions = useCallback(async () => {
-    const queryFilteredNextTransactions = query(
-      transactionsCollection,
-      orderBy('createdAt', 'desc'),
-      endBefore(transactions[0].createdAt),
-      limitToLast(transactionsPerPage)
-    );
+    try {
+      const queryFilteredNextTransactions = query(
+        transactionsCollection,
+        orderBy('createdAt', 'desc'),
+        endBefore(transactions[0].createdAt),
+        limitToLast(transactionsPerPage)
+      );
 
-    const previousTransactionsSnapshot = await getDocs(
-      queryFilteredNextTransactions
-    );
+      const previousTransactionsSnapshot = await getDocs(
+        queryFilteredNextTransactions
+      );
 
-    const transactionsList = previousTransactionsSnapshot.docs.map(
-      (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
-    );
+      const transactionsList = previousTransactionsSnapshot.docs.map(
+        (doc) => ({ ...doc.data(), id: doc.id } as Transaction)
+      );
 
-    setTransactions(transactionsList);
+      setTransactions(transactionsList);
+    } catch {
+      toast.error('Erro ao carregar as transações anteriores');
+    }
   }, [transactions]);
 
   const searchTransactions = useCallback(async (toSearch: string) => {
-    const transactionsSnapshot = await getDocs(query(transactionsCollection,
-      orderBy('createdAt', 'desc'),));
+    try {
+      const transactionsSnapshot = await getDocs(query(transactionsCollection,
+        orderBy('createdAt', 'desc'),));
 
-    const transactionsListFiltered = transactionsSnapshot.docs
-      .map((doc) => ({ ...doc.data(), id: doc.id } as Transaction))
-      .filter((transaction) =>
-        transaction.description.normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .toLowerCase()
-          .includes(toSearch.toString().toLocaleLowerCase())
-      );
+      const transactionsListFiltered = transactionsSnapshot.docs
+        .map((doc) => ({ ...doc.data(), id: doc.id } as Transaction))
+        .filter((transaction) =>
+          transaction.description.normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .includes(toSearch.toString().toLocaleLowerCase())
+        );
 
-    setTransactions(transactionsListFiltered);
+      setTransactions(transactionsListFiltered);
+    } catch {
+      toast.error('Erro ao buscar as transações');
+    }
   }, []);
 
   const createTransaction = useCallback(
@@ -159,28 +178,43 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
         createdAt: new Date().toISOString(),
       };
 
-      await addDoc(transactionsCollection, transaction);
-
-      fetchTransactions();
-      fetchAllTransactions()
-
-      setActualPage(1);
+      try {
+        await addDoc(transactionsCollection, transaction);
+        fetchTransactions();
+        fetchAllTransactions()
+        setActualPage(1);
+        toast.success('Transação criada com sucesso');
+      } catch {
+        toast.error('Erro ao criar transação');
+      }
     },
     []
   );
 
   const updateTransaction = useCallback(async (id: string, data: any) => {
     const transactionRef = doc(transactionsCollection, id);
-    await updateDoc(transactionRef, data);
-    fetchTransactions();
+
+    try {
+      await updateDoc(transactionRef, data);
+      fetchTransactions();
+      toast.success('Transação atualizada com sucesso');
+    } catch {
+      toast.error('Erro ao atualizar transação');
+    }
   }, []);
 
   const deleteTransaction = useCallback(async (id: string) => {
     const transactionToDelete = doc(transactionsCollection, id);
-    await deleteDoc(transactionToDelete);
-    fetchTransactions();
-    fetchAllTransactions()
-    setActualPage(1);
+
+    try {
+      await deleteDoc(transactionToDelete);
+      fetchTransactions();
+      fetchAllTransactions()
+      setActualPage(1);
+      toast.success('Transação deletada com sucesso');
+    } catch {
+      toast.error('Erro ao deletar transação');
+    }
   }, []);
 
   useEffect(() => {
