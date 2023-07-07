@@ -1,5 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import {
+  ButtonAlterar,
   ButtonDelete,
   CloseButton,
   Content,
@@ -86,7 +87,7 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
           <X size={24} />
         </CloseButton>
 
-        <form onSubmit={handleSubmit(handleUpdateTransaction)}>
+        <form>
           <input
             type="text"
             placeholder="Descrição"
@@ -138,10 +139,10 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
             )}
           />
 
-          <button type="submit" disabled={isSubmitting}>
+          <ButtonAlterar disabled={isSubmitting} onClick={handleSubmit(handleUpdateTransaction)}>
             Alterar
-          </button>
-          <ButtonDelete onClick={() => handleDeleteTransaction(transaction.id)}>
+          </ButtonAlterar>
+          <ButtonDelete type='button' onClick={() => handleDeleteTransaction(transaction.id)}>
             Excluir
           </ButtonDelete>
         </form>
