@@ -65,6 +65,8 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [actualPage, setActualPage] = useState(1);
   const transactionsPerPage = 10;
+  console.log('CONTEXT transactions', transactions);
+
 
   const fetchTransactions = useCallback(async () => {
     try {

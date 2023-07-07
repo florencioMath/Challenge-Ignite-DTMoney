@@ -1,4 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import {
   ButtonAlterar,
   ButtonDelete,
@@ -15,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 import * as z from 'zod';
+import DeleteTransaction from '../DeleteTransaction/DeleteTransaction';
 
 interface Transaction {
   id: string;
@@ -142,9 +144,17 @@ export function CardTransactionModal({ transaction }: TransactionProps) {
           <ButtonAlterar disabled={isSubmitting} onClick={handleSubmit(handleUpdateTransaction)}>
             Alterar
           </ButtonAlterar>
-          <ButtonDelete type='button' onClick={() => handleDeleteTransaction(transaction.id)}>
-            Excluir
-          </ButtonDelete>
+
+
+          <AlertDialog.Root>
+            <AlertDialog.Trigger asChild>
+              <ButtonDelete type='button'>
+                Excluir
+              </ButtonDelete>
+            </AlertDialog.Trigger>
+
+            <DeleteTransaction transaction={transaction} />
+          </AlertDialog.Root>
         </form>
       </Content>
     </Dialog.Portal>
