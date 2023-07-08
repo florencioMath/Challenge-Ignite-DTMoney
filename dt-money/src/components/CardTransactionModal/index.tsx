@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
 import * as z from 'zod';
-import DeleteTransaction from '../DeleteTransaction/DeleteTransaction';
+import DeleteTransaction from '../DeleteTransaction';
 
 interface Transaction {
   id: string;
