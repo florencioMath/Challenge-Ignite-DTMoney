@@ -8,8 +8,8 @@ import {
 } from './styles';
 import { useContextSelector } from 'use-context-selector';
 import { TransactionsContext } from '../../contexts/TransactionsContext';
-import { CardTransactions } from './components/CardTransaction';
-import { SearchForm } from './components/SearchForm/SearchForm';
+import { CardTransactions } from '../../components/CardTransaction';
+import { SearchForm } from '../../components/SearchForm';
 import { CardTransactionModal } from '../../components/CardTransactionModal';
 import { Pagination } from '../../components/Pagination';
 import NoTransactions from '../../components/NoTransactions';

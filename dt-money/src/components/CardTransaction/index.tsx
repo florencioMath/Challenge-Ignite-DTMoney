@@ -9,7 +9,7 @@ import {
   PriceHighlight,
   TransactionContainer,
 } from './styles';
-import { dateFormatter, priceFormatter } from '../../../../utils/formatter';
+import { dateFormatter, priceFormatter } from '../../utils/formatter';
 
 interface Transaction {
   id: string;
